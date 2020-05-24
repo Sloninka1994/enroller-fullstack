@@ -88,7 +88,40 @@
 
             clearMessage() {
                 this.message = undefined;
+            },
+
+            loadParticipants() {
+              this.meetings.forEach( (meeting) => {
+                var query = 'meetings/' + meeting.id + '/participants';
+                this.$http.get(query)
+                .then( response => 
+                {
+                  response.body.forEach( (participant =>
+                  {
+                    meeting.participants.push(participant.login);
+                  }))
+                })
+              })
+            },
+
+            loadMeetings() {
+              this.meetings = [];
+              this.$http.get('meetings')
+              .then( response => {
+                
+                for (var meeting of response.body){
+                  meeting.participants = [];
+                  this.meetings.push(meeting);
+                }
+                this.loadParticipants();
+              })
+              .catch( response => {this.failure('Błąd podczas pobierania listy spotkań. Kod błedu: ' + response.status);
+              })
             }
+        },
+
+        mounted() {
+            this.loadMeetings();            
         },
 
     }
